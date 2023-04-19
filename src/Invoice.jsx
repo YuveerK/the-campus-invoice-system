@@ -5,6 +5,10 @@ import { viewInvoiceState } from "./atoms/viewInvoiceAtom";
 import { FaDownload, FaEdit } from "react-icons/fa";
 import InvoicePdf from "./InvoicePdf";
 import { PDFDownloadLink } from "@react-pdf/renderer";
+import { useNavigate } from "react-router-dom";
+import { db } from "./firebase";
+import { v4 as uuidv4 } from "uuid";
+import { doc, setDoc } from "firebase/firestore";
 
 const Invoice = ({
   complexName,
@@ -31,30 +35,47 @@ const Invoice = ({
     return subtotal;
   };
 
+  const formatPrice = (price) => {
+    return `R${parseFloat(price)
+      .toFixed(2)
+      .replace(/\B(?=(\d{3})+(?!\d))/g, " ")}`;
+  };
+
+  const navigate = useNavigate();
+  const confirmDownload = async () => {
+    // Add a new document in collection "cities"
+    await setDoc(doc(db, "invoices", `${complexName}-${uuidv4()}`), {
+      complexName,
+      invoiceNumber,
+      invoiceDate,
+      invoiceDueDate,
+      list,
+      subtotal: calculate(),
+    });
+  };
   return (
     <InvoiceContainer>
-      <button className="download_invoice_button">
-        <div>
-          <PDFDownloadLink
-            document={
-              <InvoicePdf
-                complexName={complexName}
-                invoiceNumber={invoiceNumber}
-                invoiceDate={invoiceDate}
-                invoiceDueDate={invoiceDueDate}
-                description={description}
-                quantity={quantity}
-                amount={amount}
-                list={list}
-              />
-            }
-            fileName="somename.pdf"
-          >
-            {({ blob, url, loading, error }) =>
-              loading ? "Loading document..." : "Download now!"
-            }
-          </PDFDownloadLink>
-        </div>
+      <button
+        className="download_invoice_button"
+        style={{ marginTop: "3rem" }}
+        onClick={confirmDownload}
+      >
+        <PDFDownloadLink
+          document={
+            <InvoicePdf
+              complexName={complexName}
+              invoiceNumber={invoiceNumber}
+              invoiceDate={invoiceDate}
+              invoiceDueDate={invoiceDueDate}
+              list={list}
+            />
+          }
+          fileName="somename.pdf"
+        >
+          {({ blob, url, loading, error }) =>
+            loading ? "Loading document..." : "Download now!"
+          }
+        </PDFDownloadLink>
       </button>
       <div className="information">
         <div className="information_content">
@@ -119,7 +140,7 @@ const Invoice = ({
               <td width={"20%"} style={{ borderRight: "1px solid black" }}>
                 {item.quantity}
               </td>
-              <td width={"20%"}>R{item.amount}</td>
+              <td width={"20%"}> {formatPrice(parseFloat(item.amount))}</td>
             </tr>
           ))}
           <tr>
@@ -134,7 +155,7 @@ const Invoice = ({
               width={"20%"}
               style={{ fontWeight: "bold", fontSize: "1.2rem" }}
             >
-              R{calculate().toFixed(2)}
+              {formatPrice(parseFloat(calculate().toFixed(2)))}
             </td>
           </tr>
         </tbody>
@@ -246,6 +267,7 @@ const InvoiceContainer = styled.div`
   table {
     width: 100%;
     margin-top: 2rem;
+    border: 1px solid black;
     thead {
       tr {
         text-align: left;
@@ -259,11 +281,12 @@ const InvoiceContainer = styled.div`
     }
     tbody {
       tr {
-        :nth-child(even) {
+        /* :nth-child(even) {
           background-color: #dadada;
-        }
+        } */
         td {
           padding: 1rem;
+          border-bottom: 1px solid black;
 
           .icons {
             font-size: 1.5rem;

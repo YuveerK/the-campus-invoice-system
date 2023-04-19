@@ -4,6 +4,8 @@ import "./App.css";
 import Form from "./Form";
 import Invoice from "./Invoice";
 import { Route, Routes } from "react-router-dom";
+import InvoicePdf from "./InvoicePdf";
+import DownloadPdf from "./DownloadPdf";
 
 function App() {
   return (
@@ -11,7 +13,7 @@ function App() {
       <AppContainer>
         <Routes>
           <Route path="/" element={<Form />} />
-          <Route path="/invoice" element={<Invoice />} />
+          <Route path="/invoice" element={<DownloadPdf />} />
         </Routes>
       </AppContainer>
     </div>

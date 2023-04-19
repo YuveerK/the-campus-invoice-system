@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { AiFillEdit, AiFillDelete } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { viewInvoiceState } from "./atoms/viewInvoiceAtom";
 import Invoice from "./Invoice";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "./firebase";
 const Form = () => {
-  const [complexName, setComplexName] = useState("");
+  const [complexName, setComplexName] = useState("Princeton");
+  const [invoices, setInvoices] = useState([]);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
   const [invoiceDueDate, setInvoiceDueDate] = useState("");
@@ -16,7 +18,6 @@ const Form = () => {
   const [list, setList] = useState([]);
   const [editedIndex, setEditedIndex] = useState(-1);
   const [viewInvoice, setViewInvoice] = useRecoilState(viewInvoiceState);
-  const navigate = useNavigate();
   const handleEdit = (index) => {
     setEditedIndex(index);
   };
@@ -41,22 +42,22 @@ const Form = () => {
     newList[index] = updatedItem;
     setList(newList);
   };
-  const handleSave = (index, updatedItem) => {
+  const handleSave = () => {
     setEditedIndex(-1);
   };
 
-  console.log(
-    complexName,
-    invoiceNumber,
-    invoiceDate,
-    invoiceDueDate,
-    description,
-    quantity,
-    amount,
-    list
-  );
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      const querySnapshot = await getDocs(collection(db, "invoices"));
+      const fetchedInvoices = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setInvoices(fetchedInvoices);
+    };
+    fetchInvoices();
+  }, []);
 
-  console.log(viewInvoice);
   return (
     <>
       {viewInvoice === false ? (
@@ -66,19 +67,25 @@ const Form = () => {
             <div className="row">
               <div className="field">
                 <label htmlFor="">Complex Name</label>
-                <input
-                  value={complexName}
-                  type="text"
-                  onChange={(e) => setComplexName(e.target.value)}
-                />
+                <select onChange={(e) => setComplexName(e.target.value)}>
+                  <option value="Princeton">Princeton</option>
+                  <option value="UCLA">UCLA</option>
+                  <option value="Oxford">Oxford</option>
+                  <option value="Harvard">Harvard</option>
+                  <option value="NYU">NYU</option>
+                  <option value="Stamford">Stamford</option>
+                  <option value="Cambridge">Cambridge</option>
+                  <option value="Yale">Yale</option>
+                </select>
               </div>
 
               <div className="field">
                 <label htmlFor="">Invoice Number</label>
                 <input
-                  value={invoiceNumber}
+                  value={invoices && invoices.length}
                   type="text"
                   onChange={(e) => setInvoiceNumber(e.target.value)}
+                  disabled={true}
                 />
               </div>
               <div className="field">
@@ -130,91 +137,93 @@ const Form = () => {
             <button className="add_item_button" onClick={addItem}>
               Add Item
             </button>
-            <table cellSpacing={0}>
-              <thead>
-                <tr>
-                  <th>Description</th>
-                  <th>Quantity</th>
-                  <th>Amount</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {list.map((item, index) => (
-                  <tr key={index}>
-                    <td>
-                      {index === editedIndex ? (
-                        <input
-                          type="text"
-                          value={item.description}
-                          onChange={(e) =>
-                            handleSaves(index, {
-                              ...item,
-                              description: e.target.value,
-                            })
-                          }
-                        />
-                      ) : (
-                        item.description
-                      )}
-                    </td>
-                    <td>
-                      {index === editedIndex ? (
-                        <input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) =>
-                            handleSaves(index, {
-                              ...item,
-                              quantity: e.target.value,
-                            })
-                          }
-                        />
-                      ) : (
-                        item.quantity
-                      )}
-                    </td>
-                    <td>
-                      {index === editedIndex ? (
-                        <input
-                          type="number"
-                          value={item.amount}
-                          onChange={(e) =>
-                            handleSaves(index, {
-                              ...item,
-                              amount: e.target.value,
-                            })
-                          }
-                        />
-                      ) : (
-                        item.amount
-                      )}
-                    </td>
-                    <td>
-                      {index === editedIndex ? (
-                        <button onClick={() => handleSave(index, item)}>
-                          Save
-                        </button>
-                      ) : (
-                        <>
-                          <AiFillEdit
-                            className="icons"
-                            color="orange"
-                            onClick={() => handleEdit(index)}
-                          />
-                          <AiFillDelete
-                            className="icons"
-                            color="red"
-                            style={{ marginLeft: "1rem" }}
-                            onClick={() => handleDelete(index)}
-                          />
-                        </>
-                      )}
-                    </td>
+            <div className="table_container">
+              <table cellSpacing={0}>
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Amount</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {list.map((item, index) => (
+                    <tr key={index}>
+                      <td>
+                        {index === editedIndex ? (
+                          <input
+                            type="text"
+                            value={item.description}
+                            onChange={(e) =>
+                              handleSaves(index, {
+                                ...item,
+                                description: e.target.value,
+                              })
+                            }
+                          />
+                        ) : (
+                          item.description
+                        )}
+                      </td>
+                      <td>
+                        {index === editedIndex ? (
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              handleSaves(index, {
+                                ...item,
+                                quantity: e.target.value,
+                              })
+                            }
+                          />
+                        ) : (
+                          item.quantity
+                        )}
+                      </td>
+                      <td>
+                        {index === editedIndex ? (
+                          <input
+                            type="number"
+                            value={item.amount}
+                            onChange={(e) =>
+                              handleSaves(index, {
+                                ...item,
+                                amount: e.target.value,
+                              })
+                            }
+                          />
+                        ) : (
+                          item.amount
+                        )}
+                      </td>
+                      <td>
+                        {index === editedIndex ? (
+                          <button onClick={() => handleSave(index, item)}>
+                            Save
+                          </button>
+                        ) : (
+                          <>
+                            <AiFillEdit
+                              className="icons"
+                              color="orange"
+                              onClick={() => handleEdit(index)}
+                            />
+                            <AiFillDelete
+                              className="icons"
+                              color="red"
+                              style={{ marginLeft: "1rem" }}
+                              onClick={() => handleDelete(index)}
+                            />
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             <button
               className="add_item_button"
@@ -242,14 +251,16 @@ const Form = () => {
 
 const FormContainer = styled.div`
   width: 1000px;
-  height: 1200px;
+  height: 100vh;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
     rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   border-radius: 5px;
   background-color: white;
   padding: 2rem;
   overflow-y: scroll;
-  input {
+
+  input,
+  select {
     padding: 1rem;
     outline-color: #699eff;
     border: 1px solid lightgrey;
@@ -279,6 +290,13 @@ const FormContainer = styled.div`
         display: flex;
         flex-direction: column;
       }
+
+      @media (max-width: 680px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      @media (max-width: 520px) {
+        grid-template-columns: repeat(1, 1fr);
+      }
     }
 
     .add_item_button {
@@ -295,30 +313,35 @@ const FormContainer = styled.div`
         background-color: #3577f3;
       }
     }
-    table {
+    .table_container {
       width: 100%;
-      margin-top: 2rem;
-      thead {
-        tr {
-          text-align: left;
-          background-color: #f1f1f1;
+      overflow-x: scroll;
+      table {
+        width: 100%;
+        margin-top: 2rem;
+        overflow-x: scroll;
+        thead {
+          tr {
+            text-align: left;
+            background-color: #f1f1f1;
 
-          th {
-            padding: 1rem;
+            th {
+              padding: 1rem;
+            }
           }
         }
-      }
-      tbody {
-        tr {
-          :nth-child(even) {
-            background-color: #dadada;
-          }
-          td {
-            padding: 1rem;
+        tbody {
+          tr {
+            :nth-child(even) {
+              background-color: #dadada;
+            }
+            td {
+              padding: 1rem;
 
-            .icons {
-              font-size: 1.5rem;
-              cursor: pointer;
+              .icons {
+                font-size: 1.5rem;
+                cursor: pointer;
+              }
             }
           }
         }
