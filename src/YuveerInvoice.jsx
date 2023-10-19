@@ -1,16 +1,15 @@
-import { Font, Image } from "@react-pdf/renderer";
+import { Font, Image, PDFViewer } from "@react-pdf/renderer";
 import React from "react";
 import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
-const InvoicePdf = ({
+import { FaHome } from "react-icons/fa";
+const YuveerInvoice = ({
   complexName,
   invoiceNumber,
   invoiceDate,
   invoiceDueDate,
   list,
-  description,
-  quantity,
-  amount,
 }) => {
+  console.log(complexName);
   Font.register({
     family: "Manrope-Bold",
     src: require("./fonts/manrope/Manrope-Bold.ttf"),
@@ -53,13 +52,13 @@ const InvoicePdf = ({
       return (name = { name: "Thembi", email: "zkkhumalo@gmail.com" });
     }
     if (complexName === "Yale") {
-      return (name = { name: "Shy", email: "shykutlwano@gmail.com" });
+      return (name = { name: "Lihle", email: "lihlem3@gmail.com" });
     }
     if (complexName === "NYU") {
       return (name = { name: "Jackie", email: "jackie.krog@gmail.com" });
     }
     if (complexName === "Harvard") {
-      return (name = { name: "Wynand", email: "pm7@remax-tac.co.za" });
+      return (name = { name: "Kevin", email: "kevin12v2@gmail.com" });
     }
     if (complexName === "Oxford") {
       return (name = { name: "Warren", email: "warrengst@gmail.com" });
@@ -68,99 +67,107 @@ const InvoicePdf = ({
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 40,
-          }}
-        >
-          <Image
-            src={require("./assets/home.png")}
-            style={{ width: 30, height: 30 }}
-          />
-          <Text style={[styles.heading1, { marginTop: 10, marginLeft: 10 }]}>
-            The Campus Security Commitee
-          </Text>
-        </View>
-        <View style={styles.row}>
+        <View style={[styles.row, { backgroundColor: "#f1f1f1", padding: 10 }]}>
           <View>
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
-              THE CAMPUS ESTATE (ERF 530)
+              Yuveer Kallideen
             </Text>
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
-              152 VAN DALEN ROAD (S)
+              152 Van Dalen Road, South
             </Text>
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
-              SS SCHEME NR 180/2007
+              Ruimsig
             </Text>
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
-              WILLOWBROOK
+              Roodepoort
             </Text>
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
               1724
+            </Text>
+            <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
+              Email: yuveerkal@hotmail.com
+            </Text>
+            <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
+              Cell: 069 946 7188
             </Text>
           </View>
           <View>
             <Text
               style={[
                 styles.text1Bold,
-                { fontFamily: "Manrope-Bold", fontSize: 11 },
+                { fontFamily: "Manrope-Bold", fontSize: 9 },
               ]}
             >
               Invoice Number:{" "}
-              <Text style={{ fontFamily: "Manrope-Light", fontSize: 11 }}>
-                {invoiceNumber}
-              </Text>
+            </Text>
+            <Text style={{ fontFamily: "Manrope-Light", fontSize: 9 }}>
+              {invoiceNumber}
             </Text>
             <Text
               style={[
                 styles.text1,
-                { fontFamily: "Manrope-Bold", fontSize: 11 },
+                { fontFamily: "Manrope-Bold", fontSize: 9 },
               ]}
             >
               Invoice Date:{" "}
-              <Text style={{ fontFamily: "Manrope-Light", fontSize: 11 }}>
-                {invoiceDate}
-              </Text>
+            </Text>
+            <Text
+              style={{
+                fontFamily: "Manrope-Light",
+                fontSize: 9,
+                marginTop: -8,
+                marginBottom: 5,
+              }}
+            >
+              {invoiceDate}
             </Text>
             <Text
               style={[
                 styles.text1,
-                { fontFamily: "Manrope-Bold", fontSize: 11 },
+                { fontFamily: "Manrope-Bold", fontSize: 9, marginTop: -3 },
               ]}
             >
               Due Date:{" "}
-              <Text style={{ fontFamily: "Manrope-Light", fontSize: 11 }}>
-                {invoiceDueDate}
-              </Text>
+            </Text>
+            <Text
+              style={{
+                fontFamily: "Manrope-Light",
+                fontSize: 9,
+                marginTop: -7,
+              }}
+            >
+              {invoiceDueDate}
             </Text>
           </View>
         </View>
         <View style={styles.row}>
           <View>
             <Text style={[styles.heading1, { marginTop: 20, fontSize: 17 }]}>
-              Attention
+              Invoiced To:
             </Text>
             <Text style={styles.heading1}>
-              {complexName} - {generateName().name}
+              Shahadev Naidoo - The African Institute For Health Leadership
             </Text>
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
-              Email: {generateName().email}
+              AIHL
             </Text>
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
-              THE CAMPUS ESTATE
+              1 Orange Rock Rd.
             </Text>
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
-              152 VAN DALEN ROAD SOUTH
+              St. Michael's on Sea
             </Text>
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
-              WILLOWBROOK
+              Margate
             </Text>
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
-              1724
+              4270
+            </Text>
+            <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
+              Email: shahnaidoo@aihl.co.za
+            </Text>
+            <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
+              Cell: 083 325 3991
             </Text>
           </View>
         </View>
@@ -347,7 +354,7 @@ const InvoicePdf = ({
         >
           Account Holder:{" "}
           <Text style={{ fontFamily: "Manrope-Light", fontSize: 11 }}>
-            The Campus Stokvel
+            Yuveer Kallideen
           </Text>
         </Text>
         <Text
@@ -355,7 +362,7 @@ const InvoicePdf = ({
         >
           Account Number:{" "}
           <Text style={{ fontFamily: "Manrope-Light", fontSize: 11 }}>
-            63045834959 (Cheque)
+            62727805270
           </Text>
         </Text>
         <Text
@@ -363,7 +370,7 @@ const InvoicePdf = ({
         >
           Branch:{" "}
           <Text style={{ fontFamily: "Manrope-Light", fontSize: 11 }}>
-            FEATHERBROOK (250741)
+            Featherbrooke (250741)
           </Text>
         </Text>
         <Text
@@ -371,7 +378,7 @@ const InvoicePdf = ({
         >
           Reference:{" "}
           <Text style={{ fontFamily: "Manrope-Light", fontSize: 11 }}>
-            BODY CORPORATE NAME
+            Invoice Number
           </Text>
         </Text>
       </Page>
@@ -427,4 +434,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InvoicePdf;
+export default YuveerInvoice;

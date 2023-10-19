@@ -1,29 +1,19 @@
 import React from "react";
-import { useRecoilState } from "recoil";
 import styled from "styled-components";
-import { viewInvoiceState } from "./atoms/viewInvoiceAtom";
-import { FaDownload, FaEdit } from "react-icons/fa";
-import InvoicePdf from "./InvoicePdf";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { useNavigate } from "react-router-dom";
 import { db } from "./firebase";
-import { v4 as uuidv4 } from "uuid";
-import { doc, setDoc } from "firebase/firestore";
+import YuveerInvoice from "./YuveerInvoice";
+import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
+import InvoicePdf from "./InvoicePdf";
 
 const Invoice = ({
   complexName,
   invoiceNumber,
   invoiceDate,
   invoiceDueDate,
-  description,
-  quantity,
-  amount,
   list,
+  invoiceTitle,
+  batchNumber,
 }) => {
-  const [viewInvoice, setViewInvoice] = useRecoilState(viewInvoiceState);
-
-  console.log(viewInvoice);
-
   const calculate = () => {
     let subtotal = 0;
 
@@ -41,25 +31,42 @@ const Invoice = ({
       .replace(/\B(?=(\d{3})+(?!\d))/g, " ")}`;
   };
 
-  const navigate = useNavigate();
   const confirmDownload = async () => {
-    // Add a new document in collection "cities"
-    await setDoc(doc(db, "invoices", `${complexName}-${uuidv4()}`), {
+    // Add a new document in collection "invoices"
+    let invoiceRef = await db.collection("invoices").add({
+      invoiceTitle,
       complexName,
       invoiceNumber,
       invoiceDate,
       invoiceDueDate,
       list,
-      subtotal: calculate(),
+      total: calculate() * 8,
+      splitCost: calculate(),
+      status: "Unpaid",
+      batchNumber: batchNumber, // Store the current batch number
     });
+
+    if (invoiceRef.id) {
+      // Once the invoice is added, add a document in "batches"
+      await db.collection("batches").add({
+        invoiceId: invoiceRef.id, // Reference to the added invoice
+        batchNumber: batchNumber, // Current batch number
+        timeStamp: new Date(), // Current timestamp
+        invoiceTitle: invoiceTitle, //Title for the invoice to pull what invoices the batch relates to
+      });
+    }
+
+    console.log("Done");
   };
+
   return (
     <InvoiceContainer>
       <button
         className="download_invoice_button"
-        style={{ marginTop: "3rem" }}
-        onClick={confirmDownload}
+        style={{ marginTop: "1rem" }}
+        onClick={() => confirmDownload()}
       >
+        {/* Download Now! */}
         <PDFDownloadLink
           document={
             <InvoicePdf
@@ -70,13 +77,40 @@ const Invoice = ({
               list={list}
             />
           }
-          fileName="somename.pdf"
+          fileName={complexName}
         >
           {({ blob, url, loading, error }) =>
             loading ? "Loading document..." : "Download now!"
           }
         </PDFDownloadLink>
       </button>
+
+      {/*  
+        <div className="absolute w-full h-screen z-20 bg-black/50 flex items-center justify-center top-0 left-0">
+          <div onClick={() => setViewInvoice(false)}>
+            <p className="absolute top-8 right-20 font-bold text-2xl cursor-pointer z-10 text-white">
+              Close
+            </p>
+          </div>
+
+          <PreviewPdf
+            complexName={complexName}
+            invoiceNumber={invoiceNumber}
+            invoiceDate={invoiceDate}
+            invoiceDueDate={invoiceDueDate}
+            list={list}
+          />
+        </div> */}
+
+      {/* <PDFViewer width={"100%"} height={"1600px"}>
+        <YuveerInvoice
+          complexName={complexName}
+          invoiceNumber={invoiceNumber}
+          invoiceDate={invoiceDate}
+          invoiceDueDate={invoiceDueDate}
+          list={list}
+        />
+      </PDFViewer> */}
       <div className="information">
         <div className="information_content">
           <h1 className="heading1">The Campus Security Commitee</h1>
@@ -122,44 +156,38 @@ const Invoice = ({
         </div>
       </div>
 
-      <table width={"100%"} cellSpacing={0}>
-        <thead>
-          <tr>
-            <th>Descrition</th>
-            <th>Quantity</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {list.map((item, index) => (
-            <tr key={index}>
-              <td width={"60%"} style={{ borderRight: "1px solid black" }}>
-                {item.description}
-              </td>
-              <td width={"20%"} style={{ borderRight: "1px solid black" }}>
-                {item.quantity}
-              </td>
-              <td width={"20%"}> {formatPrice(parseFloat(item.amount))}</td>
+      <div className="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th colSpan="3" className="text-center">
+                {invoiceTitle}
+              </th>
             </tr>
-          ))}
-          <tr>
-            <td width={"60%"}></td>
-            <td
-              width={"20%"}
-              style={{ fontWeight: "bold", fontSize: "1.2rem" }}
-            >
-              Subtotal
-            </td>
-            <td
-              width={"20%"}
-              style={{ fontWeight: "bold", fontSize: "1.2rem" }}
-            >
-              {formatPrice(parseFloat(calculate().toFixed(2)))}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            <tr>
+              <th>Description</th>
+              <th>Quantity</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {list.map((item, index) => (
+              <tr key={index}>
+                <td>{item.description}</td>
+                <td>{item.quantity}</td>
+                <td>{formatPrice(parseFloat(item.amount))}</td>
+              </tr>
+            ))}
+            <tr>
+              <td colSpan="3" className="subtotal">
+                Total: {formatPrice(parseFloat(calculate().toFixed(2)))}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <br />
       <br />
       <p
@@ -197,19 +225,13 @@ const Invoice = ({
         Reference:
         <span style={{ fontWeight: "300" }}>BODY CORPORATE NAME</span>
       </p>
-      <button
-        className="download_invoice_button"
-        style={{ marginTop: "3rem" }}
-        onClick={() => setViewInvoice(false)}
-      >
-        <FaEdit /> Edit Invoice
-      </button>
     </InvoiceContainer>
   );
 };
+
 const InvoiceContainer = styled.div`
-  width: 1000px;
-  height: 1200px;
+  width: 100%;
+  height: 90%;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
     rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   border-radius: 5px;
@@ -233,11 +255,13 @@ const InvoiceContainer = styled.div`
     display: flex;
     justify-content: space-between;
     margin: 2rem 0;
+
     .information_content {
       .heading1 {
         font-size: 1rem;
         margin-bottom: 10px;
       }
+
       .text1 {
         font-size: 12px;
         line-height: 18px;
@@ -249,25 +273,34 @@ const InvoiceContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: flex-start;
+
     .information_content {
       .heading1 {
         font-size: 1rem;
         margin-bottom: 10px;
       }
+
       .heading1.main {
         font-size: 1.5rem;
         margin-bottom: 10px;
       }
+
       .text1 {
         font-size: 12px;
         line-height: 18px;
       }
     }
   }
+
+  .table-container {
+    overflow-x: auto;
+    margin-top: 2rem;
+  }
+
   table {
     width: 100%;
-    margin-top: 2rem;
     border: 1px solid black;
+
     thead {
       tr {
         text-align: left;
@@ -279,11 +312,9 @@ const InvoiceContainer = styled.div`
         }
       }
     }
+
     tbody {
       tr {
-        /* :nth-child(even) {
-          background-color: #dadada;
-        } */
         td {
           padding: 1rem;
           border-bottom: 1px solid black;
@@ -294,7 +325,15 @@ const InvoiceContainer = styled.div`
           }
         }
       }
+
+      .subtotal {
+        font-weight: bold;
+        font-size: 1.2rem;
+        text-align: right;
+        padding-right: 1rem;
+      }
     }
   }
 `;
+
 export default Invoice;

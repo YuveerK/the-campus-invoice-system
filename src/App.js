@@ -1,31 +1,31 @@
 import React from "react";
-import styled from "styled-components";
-import "./App.css";
-import Form from "./Form";
-import Invoice from "./Invoice";
 import { Route, Routes } from "react-router-dom";
-import InvoicePdf from "./InvoicePdf";
-import DownloadPdf from "./DownloadPdf";
+import Sidebar from "./Sidebar";
+import Home from "./pages/Home";
+import Clients from "./pages/Clients";
+import Invoices from "./pages/Invoices";
+import CreateInvoice from "./pages/CreateInvoice";
+import PreviewPdf from "./pages/PreviewPdf";
+import { PDFViewer } from "@react-pdf/renderer";
+import YuveerInvoice from "./YuveerInvoice";
+import InvoicePage from "./pages/InvoicePage";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <AppContainer>
+    <div className=" bg-gray-200 w-full h-screen">
+      <div className="flex bg-white p-8 rounded-md h-full">
+        <Sidebar />
         <Routes>
-          <Route path="/" element={<Form />} />
-          <Route path="/invoice" element={<DownloadPdf />} />
+          <Route exact path="/" element={<Home />} />
+          <Route exact path="/invoices" element={<Invoices />} />
+          <Route exact path="/clients" element={<Clients />} />
+          <Route exact path="/create-invoices" element={<CreateInvoice />} />
+          <Route exact path="/preview-pdf" element={<PreviewPdf />} />
+          <Route exact path="/view-invoice" element={<InvoicePage />} />
         </Routes>
-      </AppContainer>
+      </div>
     </div>
   );
-}
+};
 
-const AppContainer = styled.div`
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f1f1f1;
-`;
 export default App;

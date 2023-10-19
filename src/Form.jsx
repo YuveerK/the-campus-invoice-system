@@ -204,7 +204,7 @@ const Form = () => {
                             Save
                           </button>
                         ) : (
-                          <>
+                          <div className="flex items-center bg-red-50">
                             <AiFillEdit
                               className="icons"
                               color="orange"
@@ -216,7 +216,7 @@ const Form = () => {
                               style={{ marginLeft: "1rem" }}
                               onClick={() => handleDelete(index)}
                             />
-                          </>
+                          </div>
                         )}
                       </td>
                     </tr>
