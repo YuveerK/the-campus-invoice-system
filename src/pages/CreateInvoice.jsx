@@ -7,7 +7,7 @@ import Invoice from "../Invoice";
 import ListTable from "../components/create-invoice/ListTable";
 
 const CreateInvoice = () => {
-  const [complexName, setComplexName] = useState("Princeton");
+  const [complexName, setComplexName] = useState("All Complexes");
   const [batchCounter, setBatchCounter] = useState(0);
   const [invoiceTitle, setInvoiceTitle] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
@@ -97,6 +97,7 @@ const CreateInvoice = () => {
             className="form-input mt-1 block w-full border rounded-md p-2"
             onChange={(e) => setComplexName(e.target.value)}
           >
+            <option value="All Complexes">All Complexes</option>
             {complexOptions.map((complex) => (
               <option key={complex} value={complex}>
                 {complex}

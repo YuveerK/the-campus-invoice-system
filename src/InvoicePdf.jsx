@@ -40,6 +40,9 @@ const InvoicePdf = ({
 
   const generateName = () => {
     let name = {};
+    if (complexName === "All Complexes") {
+      return (name = { name: "The Campus Estate", email: "" });
+    }
     if (complexName === "Princeton") {
       return (name = { name: "Yuveer", email: "yuveerkal@hotmail.com" });
     }
@@ -47,7 +50,7 @@ const InvoicePdf = ({
       return (name = { name: "Tokelo", email: "tokelon@gmail.com" });
     }
     if (complexName === "Cambridge") {
-      return (name = { name: "Ninzi", email: "zzt.nana@gmail.com" });
+      return (name = { name: "Elzhervaen", email: "elzhervaenl@gmail.com" });
     }
     if (complexName === "Stanford") {
       return (name = { name: "Thembi", email: "zkkhumalo@gmail.com" });
@@ -145,8 +148,11 @@ const InvoicePdf = ({
               Attention
             </Text>
             <Text style={styles.heading1}>
-              {complexName} - {generateName().name}
+              {complexName === "All Complexes"
+                ? generateName().name
+                : `${complexName} - ${generateName().name}`}
             </Text>
+
             <Text style={[styles.text1, { fontFamily: "Manrope-Light" }]}>
               Email: {generateName().email}
             </Text>

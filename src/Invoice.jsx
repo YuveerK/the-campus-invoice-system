@@ -30,7 +30,7 @@ const Invoice = ({
       .toFixed(2)
       .replace(/\B(?=(\d{3})+(?!\d))/g, " ")}`;
   };
-
+  console.log(complexName);
   const confirmDownload = async () => {
     // Add a new document in collection "invoices"
     let invoiceRef = await db.collection("invoices").add({
@@ -77,7 +77,7 @@ const Invoice = ({
               list={list}
             />
           }
-          fileName={complexName}
+          fileName={`INV${invoiceNumber} - ${complexName} - ${invoiceTitle}`}
         >
           {({ blob, url, loading, error }) =>
             loading ? "Loading document..." : "Download now!"
